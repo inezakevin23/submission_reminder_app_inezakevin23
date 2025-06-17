@@ -6,6 +6,9 @@ set -e
 #prompting the user for their name to create a directory with that name
 read -p "Hello, please enter your name: " username
 
+#capitalising first letter of username for handling user typing error
+username=$(echo "$username" | sed -E 's/(^)([a-z])/\1\u\2/g')
+
 # Determining greeting based on time of day
 hour=$(date +"%H")
 if [ "$hour" -lt 12 ]; then
