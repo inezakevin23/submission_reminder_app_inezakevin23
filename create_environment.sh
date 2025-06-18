@@ -9,28 +9,12 @@ read -p "Hello, please enter your name: " username
 #capitalising first letter of username for handling user typing error
 username=$(echo "$username" | sed -E 's/(^)([a-z])/\1\u\2/g')
 
-# Determining greeting based on time of day
-hour=$(date +"%H")
-if [ "$hour" -lt 12 ]; then
-	greeting="Good morning"
-elif [ "$hour" -lt 17 ]; then
-	greeting="Good afternoon"
-else
-	greeting="Good evening"
-fi
-
-echo "$greeting, $username"
-
-echo "Creating directory submission_reminder_$username ..."
-
 #creating base directory and its subdirectories
 sru="submission_reminder_$username"
-mkdir -p "$sru"/{app,modules,assets,config} 
-
+mkdir -p "$sru"/{app,modules,assets,config}
 
 #creating submissions.txt with sample data
 sub="$sru/assets/submissions.txt"
-echo "Creating $sub ..."
 cat << EOF > "$sub"
 student, assignment, submission status
 Chinemerem, Shell Navigation, not submitted
@@ -45,6 +29,28 @@ Naomi, Shell Basics, not Submitted
 Simeon, Shell Navigation, submitted
 Kenia, Shell Navigation, not submitted
 EOF
+
+#checking if the username exist in sample data
+if ! grep -q "^$username, " "$sru/assets/submissions.txt"; then
+	echo "Error! the name $username is not found in submissions.txt"
+	echo "Please make sure the name matches exactly."
+	rm -rf "$sru"
+	exit 1
+fi
+
+# Determining greeting based on time of day
+hour=$(date +"%H")
+if [ "$hour" -lt 12 ]; then
+	greeting="Good morning"
+elif [ "$hour" -lt 17 ]; then
+	greeting="Good afternoon"
+else
+	greeting="Good evening"
+fi
+
+echo "$greeting, $username"
+
+echo "Creating directory submission_reminder_$username ..."
 
 #creating functions.sh
 fun="$sru/modules/functions.sh"
@@ -114,6 +120,8 @@ cat << 'EOF' > "$sta"
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$DIR"
+
+echo "Reminder app started at: $(date)"
 source ./config/config.env
 source ./modules/functions.sh
 bash ./app/reminder.sh
